@@ -65,23 +65,17 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 }
 
 func (r *ContactRepository) Remove(contactName string) bool {
-	/* redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", ":6380")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer redisConn.Close()
 
-	serializedContact, err := json.Marshal(*c)
+	_, err = redisConn.Do("HDEL", "contacts", contactName)
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
 	}
-
-	_, err = redisConn.Do("LREM", "contacts", serializedContact)
-	if err != nil {
-		fmt.Println(err.Error())
-		return false
-	} */
 
 	return true
 }

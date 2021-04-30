@@ -35,8 +35,13 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request) {
-	contactName := chi.URLParam(r, "contactName")
+	var jsonRequest map[string]string
+	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 
+	contactName := jsonRequest["name"]
 	contactRepository.Remove(contactName)
 }
 
