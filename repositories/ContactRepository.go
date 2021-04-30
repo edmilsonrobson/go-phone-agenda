@@ -21,6 +21,10 @@ func (r *ContactRepository) List() []models.Contact {
 	return phoneBook
 }
 
+func (r *ContactRepository) Update(contactId int, c *models.Contact) bool {
+	return true
+}
+
 func (r *ContactRepository) Add(c *models.Contact) bool {
 	phoneBook = append(phoneBook, *c)
 	return true
@@ -28,4 +32,12 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 
 func (r *ContactRepository) Remove(contactId int) bool {
 	return true
+}
+
+func (r *ContactRepository) FindById(contactId int) models.Contact {
+	return models.Contact{}
+}
+
+func (r *ContactRepository) FindByName(contactName string) []models.Contact {
+	return []models.Contact{}
 }
