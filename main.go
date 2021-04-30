@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	portNumber := flag.Int("port", 8000, "a port number where the server will run")
+	portNumber := flag.Int("port", 8044, "a port number where the server will run")
 	readTimeout := flag.Int("readtimeout", 10, "the timeout (in seconds) for reading")
 	writeTimeout := flag.Int("writetimeout", 10, "the timeout (in seconds) for writing")
 
@@ -18,7 +18,8 @@ func main() {
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
 		WriteTimeout: time.Duration(*writeTimeout) * time.Second,
-		Addr:         fmt.Sprintf(":%v", *portNumber),
+		Addr:         fmt.Sprintf("127.0.0.1:%v", *portNumber),
+		Handler:      routes(),
 	}
 
 	fmt.Printf("Running on http://127.0.0.1:%v\n", *portNumber)
