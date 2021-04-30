@@ -35,13 +35,9 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request) {
-	rawContactId := chi.URLParam(r, "contactId")
-	contactId, err := strconv.Atoi(rawContactId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
+	contactName := chi.URLParam(r, "contactName")
 
-	contactRepository.Remove(contactId)
+	contactRepository.Remove(contactName)
 }
 
 func SearchContactById(w http.ResponseWriter, r *http.Request) {

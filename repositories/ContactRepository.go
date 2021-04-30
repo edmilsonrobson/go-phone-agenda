@@ -18,21 +18,20 @@ func (r *ContactRepository) List() []models.Contact {
 	}
 	defer redisConn.Close()
 
-	contactBytes, err := redis.ByteSlices(redisConn.Do("LRANGE", "contacts", 0, -1))
-	if err != nil {
-		fmt.Println(err.Error())
-		return []models.Contact{}
-	}
-
 	var contacts []models.Contact
-	for _, v := range contactBytes {
+	contactStringMap, err := redis.StringMap(redisConn.Do("HGETALL", "contacts"))
+	for _, v := range contactStringMap {
 		var contact models.Contact
-		err = json.Unmarshal(v, &contact)
+		err = json.Unmarshal([]byte(v), &contact)
 		if err != nil {
 			fmt.Println(err.Error())
 			return []models.Contact{}
 		}
 		contacts = append(contacts, contact)
+	}
+	if err != nil {
+		fmt.Println(err.Error())
+		return []models.Contact{}
 	}
 
 	return contacts
@@ -45,24 +44,45 @@ func (r *ContactRepository) Update(contactId int, c *models.Contact) bool {
 func (r *ContactRepository) Add(c *models.Contact) bool {
 	redisConn, err := redis.Dial("tcp", ":6380")
 	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	defer redisConn.Close()
+
+	serializedContact, err := json.Marshal(*c)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	_, err = redisConn.Do("HSET", "contacts", c.Name, serializedContact)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	return true
+}
+
+func (r *ContactRepository) Remove(contactName string) bool {
+	/* redisConn, err := redis.Dial("tcp", ":6380")
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer redisConn.Close()
 
 	serializedContact, err := json.Marshal(*c)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err.Error())
+		return false
 	}
 
-	_, err = redisConn.Do("RPUSH", "contacts", serializedContact)
+	_, err = redisConn.Do("LREM", "contacts", serializedContact)
 	if err != nil {
-		log.Fatal(err)
-	}
+		fmt.Println(err.Error())
+		return false
+	} */
 
-	return true
-}
-
-func (r *ContactRepository) Remove(contactId int) bool {
 	return true
 }
 
