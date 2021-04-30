@@ -1,6 +1,6 @@
 package models
 
-type Contact struct{
-	Name string
-	Phone string
+type Contact struct {
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
 }
