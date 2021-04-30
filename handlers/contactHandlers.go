@@ -1,12 +1,19 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/edmilsonrobson/go-phone-agenda/repositories"
 )
 
+var contactRepository = repositories.ContactRepository{}
+
 func ListContacts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("List contacts")
+	w.Header().Set("Content-Type", "application/json")
+	contacts := contactRepository.List()
+	json.NewEncoder(w).Encode(contacts)
 }
 
 func AddContact(w http.ResponseWriter, r *http.Request) {
