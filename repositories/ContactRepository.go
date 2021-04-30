@@ -25,3 +25,7 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 	phoneBook = append(phoneBook, *c)
 	return true
 }
+
+func (r *ContactRepository) Remove(contactId int) bool {
+	return true
+}

@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/edmilsonrobson/go-phone-agenda/models"
 	"github.com/edmilsonrobson/go-phone-agenda/repositories"
+	"github.com/go-chi/chi/v5"
 )
 
 var contactRepository = repositories.ContactRepository{}
@@ -33,7 +35,13 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Delete contact")
+	rawContactId := chi.URLParam(r, "contactId")
+	contactId, err := strconv.Atoi(rawContactId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	contactRepository.Remove(contactId)
 }
 
 func SearchContactById(w http.ResponseWriter, r *http.Request) {

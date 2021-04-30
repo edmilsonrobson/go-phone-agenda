@@ -14,6 +14,7 @@ func routes() http.Handler {
 	mux.Route("/contacts", func(router chi.Router) {
 		router.Get("/", handlers.ListContacts)
 		router.Post("/", handlers.AddContact)
+		router.Delete("/{contactId}", handlers.DeleteContact)
 	})
 	return mux
 }
