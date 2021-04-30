@@ -13,6 +13,7 @@ func routes() http.Handler {
 	mux.Get("/", handlers.ListContacts)
 	mux.Route("/contacts", func(router chi.Router) {
 		router.Get("/", handlers.ListContacts)
+		router.Post("/", handlers.AddContact)
 	})
 	return mux
 }

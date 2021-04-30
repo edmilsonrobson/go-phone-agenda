@@ -6,7 +6,7 @@ import (
 
 type ContactRepository struct{}
 
-var phoneBooks = []models.Contact{
+var phoneBook = []models.Contact{
 	{
 		Name:  "Ed",
 		Phone: "+5508511111111",
@@ -18,5 +18,10 @@ var phoneBooks = []models.Contact{
 }
 
 func (r *ContactRepository) List() []models.Contact {
-	return phoneBooks
+	return phoneBook
+}
+
+func (r *ContactRepository) Add(c *models.Contact) bool {
+	phoneBook = append(phoneBook, *c)
+	return true
 }

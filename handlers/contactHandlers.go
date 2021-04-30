@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/edmilsonrobson/go-phone-agenda/models"
 	"github.com/edmilsonrobson/go-phone-agenda/repositories"
 )
 
@@ -17,7 +18,14 @@ func ListContacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddContact(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Add contact")
+	var c models.Contact
+	err := json.NewDecoder(r.Body).Decode(&c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	contactRepository.Add(&c)
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request) {
