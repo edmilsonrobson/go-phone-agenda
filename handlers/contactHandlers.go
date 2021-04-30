@@ -56,5 +56,8 @@ func SearchContactById(w http.ResponseWriter, r *http.Request) {
 }
 
 func SearchContactByName(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Search contact (by name)")
+	contactName := chi.URLParam(r, "contactName")
+
+	c := contactRepository.FindByName(contactName)
+	json.NewEncoder(w).Encode(c)
 }
