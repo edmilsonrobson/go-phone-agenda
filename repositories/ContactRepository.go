@@ -20,6 +20,11 @@ func (r *ContactRepository) List() []models.Contact {
 
 	var contacts []models.Contact
 	contactStringMap, err := redis.StringMap(redisConn.Do("HGETALL", "contacts"))
+	if err != nil {
+		fmt.Println(err.Error())
+		return []models.Contact{}
+	}
+
 	for _, v := range contactStringMap {
 		var contact models.Contact
 		err = json.Unmarshal([]byte(v), &contact)
@@ -28,10 +33,6 @@ func (r *ContactRepository) List() []models.Contact {
 			return []models.Contact{}
 		}
 		contacts = append(contacts, contact)
-	}
-	if err != nil {
-		fmt.Println(err.Error())
-		return []models.Contact{}
 	}
 
 	if contacts == nil {
@@ -117,11 +118,25 @@ func (r *ContactRepository) Remove(contactName string) bool {
 	return redisReturn
 }
 
-func (r *ContactRepository) FindById(contactId int) models.Contact {
+func (r *ContactRepository) FindByName(contactName string) models.Contact {
+	redisConn, err := redis.Dial("tcp", ":6380")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer redisConn.Close()
 
-	return models.Contact{}
-}
+	fmt.Println("OK!")
+	var contact models.Contact
+	contactString, err := redis.String(redisConn.Do("HGET", "contacts", contactName))
+	if err != nil {
+		fmt.Println(err.Error())
+		return models.Contact{}
+	}
 
-func (r *ContactRepository) FindByName(contactName string) []models.Contact {
-	return []models.Contact{}
+	fmt.Println(contactString)
+	json.Unmarshal([]byte(contactString), &contact)
+
+	fmt.Println("OK 2!")
+
+	return contact
 }

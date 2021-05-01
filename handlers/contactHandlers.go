@@ -3,11 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/edmilsonrobson/go-phone-agenda/models"
 	"github.com/edmilsonrobson/go-phone-agenda/repositories"
-	"github.com/go-chi/chi/v5"
 )
 
 var contactRepository = repositories.ContactRepository{}
@@ -61,20 +59,14 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SearchContactById(w http.ResponseWriter, r *http.Request) {
-	rawContactId := chi.URLParam(r, "contactId")
-	contactId, err := strconv.Atoi(rawContactId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	c := contactRepository.FindById(contactId)
-	json.NewEncoder(w).Encode(c)
-}
-
 func SearchContactByName(w http.ResponseWriter, r *http.Request) {
-	contactName := chi.URLParam(r, "contactName")
+	contactName := r.URL.Query().Get("name")
 
 	c := contactRepository.FindByName(contactName)
-	json.NewEncoder(w).Encode(c)
+	if c != (models.Contact{}) {
+		json.NewEncoder(w).Encode(c)
+	} else {
+		http.Error(w, "No contacts found", http.StatusNoContent)
+	}
+
 }
