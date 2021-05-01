@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/edmilsonrobson/go-phone-agenda/internal/handlers"
 )
 
 func main() {
@@ -19,7 +21,7 @@ func main() {
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
 		WriteTimeout: time.Duration(*writeTimeout) * time.Second,
 		Addr:         fmt.Sprintf("127.0.0.1:%v", *portNumber),
-		Handler:      routes(),
+		Handler:      handlers.Routes(),
 	}
 
 	fmt.Printf("Running on http://127.0.0.1:%v\n", *portNumber)

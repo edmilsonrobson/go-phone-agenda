@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestRoutes(t *testing.T) {
-	mux := routes()
+	mux := Routes()
 
 	switch mux.(type) {
 	case *chi.Mux:

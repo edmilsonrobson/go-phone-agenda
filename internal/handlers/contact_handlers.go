@@ -17,6 +17,7 @@ func ListContacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddContact(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var c models.Contact
 	err := json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
@@ -55,7 +56,7 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 
 	success := contactRepository.Remove(contactName)
 	if !success {
-		http.Error(w, "Could not delete", http.StatusBadRequest)
+		http.Error(w, "Could not delete requested contact", http.StatusBadRequest)
 	}
 }
 

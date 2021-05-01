@@ -55,6 +55,15 @@ func (r *ContactRepository) Update(contactName string, updatedContact *models.Co
 		return false
 	}
 
+	exists, err := redis.Bool(redisConn.Do("HEXISTS", "contacts", contactName))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	if !exists {
+		return false
+	}
+
 	// Name is the same, so just update the value of that same key, because the name is used as the key
 	if updatedContact.Name == contactName {
 		_, err = redisConn.Do("HSET", "contacts", contactName, serializedContact)
@@ -125,7 +134,6 @@ func (r *ContactRepository) FindByName(contactName string) models.Contact {
 	}
 	defer redisConn.Close()
 
-	fmt.Println("OK!")
 	var contact models.Contact
 	contactString, err := redis.String(redisConn.Do("HGET", "contacts", contactName))
 	if err != nil {
@@ -133,10 +141,7 @@ func (r *ContactRepository) FindByName(contactName string) models.Contact {
 		return models.Contact{}
 	}
 
-	fmt.Println(contactString)
 	json.Unmarshal([]byte(contactString), &contact)
-
-	fmt.Println("OK 2!")
 
 	return contact
 }
