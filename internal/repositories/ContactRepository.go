@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/edmilsonrobson/go-phone-agenda/models"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
 	"github.com/gomodule/redigo/redis"
 )
 

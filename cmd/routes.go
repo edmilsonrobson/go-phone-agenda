@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/edmilsonrobson/go-phone-agenda/handlers"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/handlers"
 	"github.com/go-chi/chi/v5"
 )
 

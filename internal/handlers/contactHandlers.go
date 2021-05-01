@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/edmilsonrobson/go-phone-agenda/models"
-	"github.com/edmilsonrobson/go-phone-agenda/repositories"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
 )
 
 var contactRepository = repositories.ContactRepository{}
