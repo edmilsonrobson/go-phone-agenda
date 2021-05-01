@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
 	"github.com/gomodule/redigo/redis"
@@ -12,7 +13,7 @@ import (
 type ContactRepository struct{}
 
 func (r *ContactRepository) List() []models.Contact {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("DEV_REDIS_PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +43,7 @@ func (r *ContactRepository) List() []models.Contact {
 }
 
 func (r *ContactRepository) Update(contactName string, updatedContact *models.Contact) bool {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("DEV_REDIS_PORT"))
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
@@ -88,7 +89,7 @@ func (r *ContactRepository) Update(contactName string, updatedContact *models.Co
 }
 
 func (r *ContactRepository) Add(c *models.Contact) bool {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("DEV_REDIS_PORT"))
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
@@ -119,7 +120,7 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 }
 
 func (r *ContactRepository) Remove(contactName string) bool {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("DEV_REDIS_PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +136,7 @@ func (r *ContactRepository) Remove(contactName string) bool {
 }
 
 func (r *ContactRepository) FindByName(contactName string) models.Contact {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("DEV_REDIS_PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}

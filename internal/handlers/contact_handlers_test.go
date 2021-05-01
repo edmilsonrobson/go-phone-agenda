@@ -389,7 +389,7 @@ func TestSearchContactByName(t *testing.T) {
 }
 
 func flushRedis() {
-	redisConn, err := redis.Dial("tcp", ":6380")
+	redisConn, err := redis.Dial("tcp", os.Getenv("TEST_REDIS_PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}

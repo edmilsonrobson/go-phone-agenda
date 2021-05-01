@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/handlers"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	portNumber := flag.Int("port", 8044, "a port number where the server will run")
+	godotenv.Load()
+
+	portNumber := flag.Int("port", os.Getenv("DEV_DEFAULT_PORT"), "a port number where the server will run")
 	readTimeout := flag.Int("readtimeout", 10, "the timeout (in seconds) for reading")
 	writeTimeout := flag.Int("writetimeout", 10, "the timeout (in seconds) for writing")
-
 	flag.Parse()
 
 	srv := &http.Server{
