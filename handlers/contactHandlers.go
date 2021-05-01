@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -31,7 +30,20 @@ func AddContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Update contact")
+	var jsonRequest map[string]json.RawMessage
+	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	var updatedContact models.Contact
+	var contactName string
+	json.Unmarshal(jsonRequest["name"], &contactName)
+	json.Unmarshal([]byte(jsonRequest["updatedContact"]), &updatedContact)
+	success := contactRepository.Update(contactName, &updatedContact)
+	if !success {
+		http.Error(w, "Could not update", http.StatusBadRequest)
+	}
 }
 
 func DeleteContact(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +54,11 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	contactName := jsonRequest["name"]
-	contactRepository.Remove(contactName)
+
+	success := contactRepository.Remove(contactName)
+	if !success {
+		http.Error(w, "Could not delete", http.StatusBadRequest)
+	}
 }
 
 func SearchContactById(w http.ResponseWriter, r *http.Request) {

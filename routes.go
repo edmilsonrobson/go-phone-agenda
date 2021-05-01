@@ -16,7 +16,7 @@ func routes() http.Handler {
 		router.Get("/{contactId}", handlers.SearchContactById)
 		router.Get("/byName/{contactName}", handlers.SearchContactByName)
 		router.Post("/", handlers.AddContact)
-		router.Put("/{contactId}", handlers.UpdateContact)
+		router.Put("/", handlers.UpdateContact)
 		router.Delete("/", handlers.DeleteContact)
 	})
 	return mux
