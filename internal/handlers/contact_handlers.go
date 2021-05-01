@@ -16,6 +16,18 @@ func ListContacts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(contacts)
 }
 
+func validateContact(contact *models.Contact) bool {
+	fields := []string{contact.Name, contact.Phone}
+
+	for _, v := range fields {
+		if v == "" {
+			return false
+		}
+	}
+
+	return true
+}
+
 func AddContact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var c models.Contact
@@ -25,7 +37,14 @@ func AddContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contactRepository.Add(&c)
+	if !validateContact(&c) {
+		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+		return
+	}
+	success := contactRepository.Add(&c)
+	if !success {
+		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+	}
 }
 
 func UpdateContact(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +58,11 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 	var contactName string
 	json.Unmarshal(jsonRequest["name"], &contactName)
 	json.Unmarshal([]byte(jsonRequest["updatedContact"]), &updatedContact)
+
+	if !validateContact(&updatedContact) {
+		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+		return
+	}
 	success := contactRepository.Update(contactName, &updatedContact)
 	if !success {
 		http.Error(w, "Could not update", http.StatusBadRequest)

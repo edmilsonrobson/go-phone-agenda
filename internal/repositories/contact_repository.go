@@ -59,12 +59,11 @@ func (r *ContactRepository) Update(contactName string, updatedContact *models.Co
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-
 	if !exists {
 		return false
 	}
 
-	// Name is the same, so just update the value of that same key, because the name is used as the key
+	// If the name is the same, just update the value of that same key (since the name is used as the key)
 	if updatedContact.Name == contactName {
 		_, err = redisConn.Do("HSET", "contacts", contactName, serializedContact)
 		if err != nil {
@@ -99,6 +98,14 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 	serializedContact, err := json.Marshal(*c)
 	if err != nil {
 		fmt.Println(err.Error())
+		return false
+	}
+
+	exists, err := redis.Bool(redisConn.Do("HEXISTS", "contacts", c.Name))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	if exists {
 		return false
 	}
 
