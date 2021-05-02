@@ -30,20 +30,22 @@ func validateContact(contact *models.Contact) bool {
 
 func AddContact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	var c models.Contact
 	err := json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 
 	if !validateContact(&c) {
 		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
-		return
-	}
-	success := contactRepository.Add(&c)
-	if !success {
-		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+	} else {
+		success := contactRepository.Add(&c)
+		if success {
+			w.WriteHeader(200)
+		} else {
+			http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+		}
 	}
 }
 
@@ -61,11 +63,13 @@ func UpdateContact(w http.ResponseWriter, r *http.Request) {
 
 	if !validateContact(&updatedContact) {
 		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
-		return
-	}
-	success := contactRepository.Update(contactName, &updatedContact)
-	if !success {
-		http.Error(w, "Could not update", http.StatusBadRequest)
+	} else {
+		success := contactRepository.Update(contactName, &updatedContact)
+		if success {
+			w.WriteHeader(200)
+		} else {
+			http.Error(w, "Could not update", http.StatusBadRequest)
+		}
 	}
 }
 
