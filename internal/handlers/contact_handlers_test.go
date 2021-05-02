@@ -10,10 +10,13 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
 	"github.com/gomodule/redigo/redis"
+	"github.com/joho/godotenv"
 )
 
 type UpdatedContact struct {
@@ -26,15 +29,25 @@ type UpdateContactBody struct {
 	UpdatedContact UpdatedContact `json:"updatedContact"`
 }
 
+var routes http.Handler
+
 func TestMain(m *testing.M) {
+	loadTestEnv()
+	routes = getTestRoutes()
 	flushRedis()
 	code := m.Run()
 	flushRedis()
 	os.Exit(code)
 }
 
+func loadTestEnv() {
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
+	path := filepath.Join(basepath, "../../.env.test")
+	godotenv.Load(path)
+}
+
 func TestManipulatingContactAndCheckingTheList(t *testing.T) {
-	routes := Routes()
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close()
 	// Add contact
@@ -240,7 +253,6 @@ func TestManipulatingContactAndCheckingTheList(t *testing.T) {
 }
 
 func TestCreatingDuplicateEntries(t *testing.T) {
-	routes := Routes()
 
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close()
@@ -313,7 +325,6 @@ func TestCreatingDuplicateEntries(t *testing.T) {
 }
 
 func TestAddingIncompleteContact(t *testing.T) {
-	routes := Routes()
 
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close()
@@ -339,7 +350,6 @@ func TestAddingIncompleteContact(t *testing.T) {
 }
 
 func TestUpdatingIncompleteContact(t *testing.T) {
-	routes := Routes()
 
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close()
@@ -365,7 +375,6 @@ func TestUpdatingIncompleteContact(t *testing.T) {
 }
 
 func TestSearchContactByName(t *testing.T) {
-	routes := Routes()
 	routeToTest := "/contacts/search"
 
 	ts := httptest.NewTLSServer(routes)
@@ -389,7 +398,7 @@ func TestSearchContactByName(t *testing.T) {
 }
 
 func flushRedis() {
-	redisConn, err := redis.Dial("tcp", os.Getenv("TEST_REDIS_PORT"))
+	redisConn, err := redis.Dial("tcp", ":"+os.Getenv("REDIS_PORT"))
 	if err != nil {
 		log.Fatal(err)
 	}
