@@ -16,12 +16,17 @@ import (
 func main() {
 	godotenv.Load()
 
-	defaultPortNumber, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	defaultServerPort := os.Getenv("SERVER_PORT")
+	if defaultServerPort == "" {
+		log.Fatal("No server port in .env file. Missing .env?")
+	}
+
+	defaultServerPortInt, err := strconv.Atoi(defaultServerPort)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	portNumber := flag.Int("port", defaultPortNumber, "a port number where the server will run")
+	portNumber := flag.Int("port", defaultServerPortInt, "a port number where the server will run")
 	readTimeout := flag.Int("readtimeout", 10, "the timeout (in seconds) for reading")
 	writeTimeout := flag.Int("writetimeout", 10, "the timeout (in seconds) for writing")
 	flag.Parse()
@@ -29,14 +34,15 @@ func main() {
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
 		WriteTimeout: time.Duration(*writeTimeout) * time.Second,
-		Addr:         fmt.Sprintf("127.0.0.1:%v", *portNumber),
+		Addr:         fmt.Sprintf(":%v", *portNumber),
 		Handler:      handlers.Routes(),
 	}
 
-	fmt.Printf("Running on http://127.0.0.1:%v\n", *portNumber)
+	fmt.Printf("Running on 127.0.0.1:%v\n", *portNumber)
 	fmt.Printf("Read timeout: %v seconds | Write timeout: %v seconds\n", *readTimeout, *writeTimeout)
-	fmt.Printf("Redis on port %v\n", os.Getenv("REDIS_PORT"))
+	fmt.Printf("Redis hostname: %v\n", os.Getenv("REDIS_ADDRESS"))
 	fmt.Printf("Environment: %v\n", os.Getenv("ENV"))
+
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)

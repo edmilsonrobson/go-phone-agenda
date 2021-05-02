@@ -396,7 +396,7 @@ func TestSearchContactByName(t *testing.T) {
 }
 
 func flushRedis() {
-	redisConn, err := redis.Dial("tcp", ":"+os.Getenv("REDIS_PORT"))
+	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 	if err != nil {
 		log.Fatal(err)
 	}

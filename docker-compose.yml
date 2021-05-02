@@ -1,0 +1,13 @@
+version: "3"
+services:
+    web:
+        stdin_open: true
+        restart: always
+        build: .
+        ports:
+            - "8044:8044"
+    redis-server:
+        image: redis
+        restart: always
+        ports:
+            - "6379:6379"

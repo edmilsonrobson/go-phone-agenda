@@ -1,4 +1,7 @@
 coverage.out
 .env
 .vscode
-storage/logs
+storage/logs/*
+!storage/logs
+dist
+dist/*

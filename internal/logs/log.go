@@ -12,7 +12,7 @@ var (
 )
 
 func init() {
-	logPath := "storage/logs/agendajuju.log"
+	logPath := "agendajuju.log"
 
 	file, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
