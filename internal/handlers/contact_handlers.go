@@ -83,7 +83,9 @@ func DeleteContact(w http.ResponseWriter, r *http.Request) {
 	contactName := jsonRequest["name"]
 
 	success := contactRepository.Remove(contactName)
-	if !success {
+	if success {
+		w.WriteHeader(200)
+	} else {
 		http.Error(w, "Could not delete requested contact", http.StatusBadRequest)
 	}
 }
