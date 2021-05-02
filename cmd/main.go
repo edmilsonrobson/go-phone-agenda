@@ -35,6 +35,8 @@ func main() {
 
 	fmt.Printf("Running on http://127.0.0.1:%v\n", *portNumber)
 	fmt.Printf("Read timeout: %v seconds | Write timeout: %v seconds\n", *readTimeout, *writeTimeout)
+	fmt.Printf("Redis on port %v\n", os.Getenv("REDIS_PORT"))
+	fmt.Printf("Environment: %v\n", os.Getenv("ENV"))
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
