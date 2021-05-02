@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -200,7 +199,6 @@ func TestManipulatingContactAndCheckingTheList(t *testing.T) {
 	json.Unmarshal(respBody, &contacts)
 	if len(contacts) != len(expectedContacts) {
 		t.Errorf("Expected %v contact, but found %v", len(expectedContacts), len(contacts))
-		fmt.Println(contacts)
 	}
 	if contacts[0] != expectedContacts[0] {
 		t.Errorf("Expected first contact to be %v, but instead got %v", expectedContacts[0], contacts[0])

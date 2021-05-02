@@ -52,7 +52,7 @@ func (r *ContactRepository) Update(contactName string, updatedContact *models.Co
 
 	serializedContact, err := json.Marshal(*updatedContact)
 	if err != nil {
-		logs.WarningLogger.Printf(err.Error())
+		logs.ErrorLogger.Printf(err.Error())
 		return false
 	}
 

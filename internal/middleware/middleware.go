@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -27,7 +26,6 @@ func LogRequest(next http.Handler) http.Handler {
 }
 
 func (w *responseObserver) Status() int {
-	fmt.Println("response status")
 	return w.status
 }
 
