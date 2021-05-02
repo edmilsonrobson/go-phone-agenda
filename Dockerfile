@@ -19,7 +19,7 @@ RUN go build -o main ./cmd/*.go
 WORKDIR /dist
 
 RUN cp /build/main .
-COPY .env .
+COPY .env.docker .env
 
 RUN chmod +x /dist/main
 EXPOSE 8045
