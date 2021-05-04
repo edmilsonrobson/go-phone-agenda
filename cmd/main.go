@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/edmilsonrobson/go-phone-agenda/internal/handlers"
 	"github.com/joho/godotenv"
 )
 
@@ -35,13 +34,16 @@ func main() {
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
 		WriteTimeout: time.Duration(*writeTimeout) * time.Second,
 		Addr:         fmt.Sprintf(":%v", *portNumber),
-		Handler:      handlers.Routes(),
+		Handler:      Routes(),
 	}
 
 	fmt.Printf("Running on 127.0.0.1:%v\n", *portNumber)
 	fmt.Printf("Read timeout: %v seconds | Write timeout: %v seconds\n", *readTimeout, *writeTimeout)
 	fmt.Printf("Redis hostname: %v\n", os.Getenv("REDIS_ADDRESS"))
 	fmt.Printf("Environment: %v\n", os.Getenv("ENV"))
+
+	// Pass it down to repository -> handlers
+	//redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 
 	err = srv.ListenAndServe()
 	if err != nil {

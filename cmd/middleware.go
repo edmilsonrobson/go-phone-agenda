@@ -1,4 +1,4 @@
-package middlewares
+package main
 
 import (
 	"net/http"
@@ -30,9 +30,6 @@ func (w *responseObserver) Status() int {
 }
 
 func (w *responseObserver) Write(p []byte) (n int, err error) {
-	if !w.wroteHeader {
-		w.WriteHeader(http.StatusOK)
-	}
 	return w.ResponseWriter.Write(p)
 }
 
