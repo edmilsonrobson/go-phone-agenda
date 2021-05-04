@@ -2,8 +2,6 @@ package repositories
 
 import (
 	"encoding/json"
-	"log"
-	"os"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/logs"
 	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
@@ -39,20 +37,13 @@ func (r *RedisContactRepository) List() []models.Contact {
 }
 
 func (r *RedisContactRepository) Update(contactName string, updatedContact *models.Contact) bool {
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
-	if err != nil {
-		logs.WarningLogger.Printf(err.Error())
-		return false
-	}
-	defer redisConn.Close()
-
 	serializedContact, err := json.Marshal(*updatedContact)
 	if err != nil {
 		logs.ErrorLogger.Printf(err.Error())
 		return false
 	}
 
-	exists, err := redis.Bool(redisConn.Do("HEXISTS", "contacts", contactName))
+	exists, err := redis.Bool(r.redisConn.Do("HEXISTS", "contacts", contactName))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 	}
@@ -62,19 +53,19 @@ func (r *RedisContactRepository) Update(contactName string, updatedContact *mode
 
 	// If the name is the same, just update the value of that same key (since the name is used as the key)
 	if updatedContact.Name == contactName {
-		_, err = redisConn.Do("HSET", "contacts", contactName, serializedContact)
+		_, err = r.redisConn.Do("HSET", "contacts", contactName, serializedContact)
 		if err != nil {
 			logs.WarningLogger.Printf(err.Error())
 			return false
 		}
 	} else {
 		// Name has changed. Delete the old record and create it under a new key, since names are used for keys
-		_, err = redisConn.Do("HSET", "contacts", updatedContact.Name, serializedContact)
+		_, err = r.redisConn.Do("HSET", "contacts", updatedContact.Name, serializedContact)
 		if err != nil {
 			logs.WarningLogger.Printf(err.Error())
 			return false
 		}
-		_, err = redisConn.Do("HDEL", "contacts", contactName, serializedContact)
+		_, err = r.redisConn.Do("HDEL", "contacts", contactName, serializedContact)
 		if err != nil {
 			logs.WarningLogger.Printf(err.Error())
 			return false
@@ -85,20 +76,13 @@ func (r *RedisContactRepository) Update(contactName string, updatedContact *mode
 }
 
 func (r *RedisContactRepository) Add(c *models.Contact) bool {
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
-	if err != nil {
-		logs.WarningLogger.Printf(err.Error())
-		return false
-	}
-	defer redisConn.Close()
-
 	serializedContact, err := json.Marshal(*c)
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 		return false
 	}
 
-	exists, err := redis.Bool(redisConn.Do("HEXISTS", "contacts", c.Name))
+	exists, err := redis.Bool(r.redisConn.Do("HEXISTS", "contacts", c.Name))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 	}
@@ -106,7 +90,7 @@ func (r *RedisContactRepository) Add(c *models.Contact) bool {
 		return false
 	}
 
-	_, err = redisConn.Do("HSET", "contacts", c.Name, serializedContact)
+	_, err = r.redisConn.Do("HSET", "contacts", c.Name, serializedContact)
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 		return false
@@ -116,13 +100,7 @@ func (r *RedisContactRepository) Add(c *models.Contact) bool {
 }
 
 func (r *RedisContactRepository) Remove(contactName string) bool {
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer redisConn.Close()
-
-	redisReturn, err := redis.Bool(redisConn.Do("HDEL", "contacts", contactName))
+	redisReturn, err := redis.Bool(r.redisConn.Do("HDEL", "contacts", contactName))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 		return false
@@ -132,14 +110,8 @@ func (r *RedisContactRepository) Remove(contactName string) bool {
 }
 
 func (r *RedisContactRepository) SearchByName(contactName string) *models.Contact {
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer redisConn.Close()
-
 	var contact models.Contact
-	contactString, err := redis.String(redisConn.Do("HGET", "contacts", contactName))
+	contactString, err := redis.String(r.redisConn.Do("HGET", "contacts", contactName))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 		return &models.Contact{}
