@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/edmilsonrobson/go-phone-agenda/internal/logs"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
 )
 
@@ -30,20 +33,26 @@ func main() {
 	writeTimeout := flag.Int("writetimeout", 10, "the timeout (in seconds) for writing")
 	flag.Parse()
 
+	// Pass it down to repository -> handlers
+	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
+	if err != nil {
+		logs.ErrorLogger.Printf("Failed to connect with Redis: %v", err)
+	}
+	defer redisConn.Close()
+
+	repository := repositories.NewRedisRepository(&redisConn)
+
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
 		WriteTimeout: time.Duration(*writeTimeout) * time.Second,
 		Addr:         fmt.Sprintf(":%v", *portNumber),
-		Handler:      Routes(),
+		Handler:      Routes(repository),
 	}
 
 	fmt.Printf("Running on 127.0.0.1:%v\n", *portNumber)
 	fmt.Printf("Read timeout: %v seconds | Write timeout: %v seconds\n", *readTimeout, *writeTimeout)
 	fmt.Printf("Redis hostname: %v\n", os.Getenv("REDIS_ADDRESS"))
 	fmt.Printf("Environment: %v\n", os.Getenv("ENV"))
-
-	// Pass it down to repository -> handlers
-	//redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 
 	err = srv.ListenAndServe()
 	if err != nil {

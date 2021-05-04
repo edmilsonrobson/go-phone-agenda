@@ -5,15 +5,14 @@ import (
 	"net/http"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
-	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
 )
 
-var contactRepository = repositories.ContactRepository{}
-
-func ListContacts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	contacts := contactRepository.List()
-	json.NewEncoder(w).Encode(contacts)
+type ContactRepository interface {
+	List() []models.Contact
+	Add(*models.Contact) bool
+	Update(string, *models.Contact) bool
+	Remove(string) bool
+	SearchByName(string) *models.Contact
 }
 
 func validateContact(contact *models.Contact) bool {
@@ -28,76 +27,91 @@ func validateContact(contact *models.Contact) bool {
 	return true
 }
 
-func AddContact(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var c models.Contact
-	err := json.NewDecoder(r.Body).Decode(&c)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+func ListContacts(repo ContactRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		contacts := repo.List()
+		json.NewEncoder(w).Encode(contacts)
 	}
+}
 
-	if !validateContact(&c) {
-		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
-	} else {
-		success := contactRepository.Add(&c)
-		if success {
-			w.WriteHeader(200)
-		} else {
+func AddContact(repo ContactRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		var c models.Contact
+		err := json.NewDecoder(r.Body).Decode(&c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+
+		if !validateContact(&c) {
 			http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+		} else {
+			success := repo.Add(&c)
+			if success {
+				w.WriteHeader(200)
+			} else {
+				http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+			}
 		}
 	}
 }
 
-func UpdateContact(w http.ResponseWriter, r *http.Request) {
-	var jsonRequest map[string]json.RawMessage
-	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+func UpdateContact(repo ContactRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var jsonRequest map[string]json.RawMessage
+		err := json.NewDecoder(r.Body).Decode(&jsonRequest)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+
+		var updatedContact models.Contact
+		var contactName string
+		json.Unmarshal(jsonRequest["name"], &contactName)
+		json.Unmarshal([]byte(jsonRequest["updatedContact"]), &updatedContact)
+
+		if !validateContact(&updatedContact) {
+			http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+		} else {
+			success := repo.Update(contactName, &updatedContact)
+			if success {
+				w.WriteHeader(200)
+			} else {
+				http.Error(w, "Could not update", http.StatusBadRequest)
+			}
+		}
 	}
+}
 
-	var updatedContact models.Contact
-	var contactName string
-	json.Unmarshal(jsonRequest["name"], &contactName)
-	json.Unmarshal([]byte(jsonRequest["updatedContact"]), &updatedContact)
+func DeleteContact(repo ContactRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var jsonRequest map[string]string
+		err := json.NewDecoder(r.Body).Decode(&jsonRequest)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
 
-	if !validateContact(&updatedContact) {
-		http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
-	} else {
-		success := contactRepository.Update(contactName, &updatedContact)
+		contactName := jsonRequest["name"]
+
+		success := repo.Remove(contactName)
 		if success {
 			w.WriteHeader(200)
 		} else {
-			http.Error(w, "Could not update", http.StatusBadRequest)
+			http.Error(w, "Could not delete requested contact", http.StatusBadRequest)
 		}
 	}
 }
 
-func DeleteContact(w http.ResponseWriter, r *http.Request) {
-	var jsonRequest map[string]string
-	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+func SearchContactByName(repo ContactRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		contactName := r.URL.Query().Get("name")
+
+		c := repo.SearchByName(contactName)
+		if *c != (models.Contact{}) {
+			json.NewEncoder(w).Encode(c)
+		} else {
+			http.Error(w, "No contacts found", http.StatusNoContent)
+		}
 	}
-
-	contactName := jsonRequest["name"]
-
-	success := contactRepository.Remove(contactName)
-	if success {
-		w.WriteHeader(200)
-	} else {
-		http.Error(w, "Could not delete requested contact", http.StatusBadRequest)
-	}
-}
-
-func SearchContactByName(w http.ResponseWriter, r *http.Request) {
-	contactName := r.URL.Query().Get("name")
-
-	c := contactRepository.FindByName(contactName)
-	if c != (models.Contact{}) {
-		json.NewEncoder(w).Encode(c)
-	} else {
-		http.Error(w, "No contacts found", http.StatusNoContent)
-	}
-
 }

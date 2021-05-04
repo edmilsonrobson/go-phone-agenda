@@ -10,17 +10,13 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type ContactRepository struct{}
+type RedisContactRepository struct {
+	redisConn redis.Conn
+}
 
-func (r *ContactRepository) List() []models.Contact {
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer redisConn.Close()
-
+func (r *RedisContactRepository) List() []models.Contact {
 	var contacts []models.Contact
-	contactStringMap, err := redis.StringMap(redisConn.Do("HGETALL", "contacts"))
+	contactStringMap, err := redis.StringMap(r.redisConn.Do("HGETALL", "contacts"))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
 		return []models.Contact{}
@@ -42,7 +38,7 @@ func (r *ContactRepository) List() []models.Contact {
 	return contacts
 }
 
-func (r *ContactRepository) Update(contactName string, updatedContact *models.Contact) bool {
+func (r *RedisContactRepository) Update(contactName string, updatedContact *models.Contact) bool {
 	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
@@ -88,7 +84,7 @@ func (r *ContactRepository) Update(contactName string, updatedContact *models.Co
 	return true
 }
 
-func (r *ContactRepository) Add(c *models.Contact) bool {
+func (r *RedisContactRepository) Add(c *models.Contact) bool {
 	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
@@ -119,7 +115,7 @@ func (r *ContactRepository) Add(c *models.Contact) bool {
 	return true
 }
 
-func (r *ContactRepository) Remove(contactName string) bool {
+func (r *RedisContactRepository) Remove(contactName string) bool {
 	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 	if err != nil {
 		log.Fatal(err)
@@ -135,7 +131,7 @@ func (r *ContactRepository) Remove(contactName string) bool {
 	return redisReturn
 }
 
-func (r *ContactRepository) FindByName(contactName string) models.Contact {
+func (r *RedisContactRepository) SearchByName(contactName string) *models.Contact {
 	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
 	if err != nil {
 		log.Fatal(err)
@@ -146,10 +142,16 @@ func (r *ContactRepository) FindByName(contactName string) models.Contact {
 	contactString, err := redis.String(redisConn.Do("HGET", "contacts", contactName))
 	if err != nil {
 		logs.WarningLogger.Printf(err.Error())
-		return models.Contact{}
+		return &models.Contact{}
 	}
 
 	json.Unmarshal([]byte(contactString), &contact)
 
-	return contact
+	return &contact
+}
+
+func NewRedisRepository(redisConn *redis.Conn) *RedisContactRepository {
+	return &RedisContactRepository{
+		redisConn: *redisConn,
+	}
 }
