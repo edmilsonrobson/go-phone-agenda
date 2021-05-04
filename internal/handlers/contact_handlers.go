@@ -46,7 +46,7 @@ func AddContact(repo ContactRepository) http.HandlerFunc {
 		}
 
 		if !validateContact(&c) {
-			http.Error(w, "Cannot add duplicate contacts", http.StatusBadRequest)
+			http.Error(w, "Missing fields.", http.StatusBadRequest)
 		} else {
 			success := repo.Add(&c)
 			if success {

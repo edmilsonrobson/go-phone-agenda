@@ -3,19 +3,21 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
 	"github.com/go-chi/chi/v5"
 )
 
 func getTestRoutes() http.Handler {
 	mux := chi.NewRouter()
 
-	mux.Get("/", ListContacts)
+	r := repositories.NewInMemoryContactRepository()
+
 	mux.Route("/contacts", func(router chi.Router) {
-		router.Get("/", ListContacts)
-		router.Get("/search", SearchContactByName)
-		router.Post("/", AddContact)
-		router.Post("/update", UpdateContact)
-		router.Delete("/", DeleteContact)
+		router.Get("/", ListContacts(r))
+		router.Get("/search", SearchContactByName(r))
+		router.Post("/", AddContact(r))
+		router.Post("/update", UpdateContact(r))
+		router.Delete("/", DeleteContact(r))
 	})
 
 	return mux

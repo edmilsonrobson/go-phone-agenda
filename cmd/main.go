@@ -40,7 +40,7 @@ func main() {
 	}
 	defer redisConn.Close()
 
-	repository := repositories.NewRedisRepository(&redisConn)
+	repository := repositories.NewInMemoryContactRepository()
 
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,

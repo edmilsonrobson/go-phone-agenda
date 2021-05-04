@@ -150,7 +150,7 @@ func (r *RedisContactRepository) SearchByName(contactName string) *models.Contac
 	return &contact
 }
 
-func NewRedisRepository(redisConn *redis.Conn) *RedisContactRepository {
+func NewRedisContactRepository(redisConn *redis.Conn) *RedisContactRepository {
 	return &RedisContactRepository{
 		redisConn: *redisConn,
 	}
