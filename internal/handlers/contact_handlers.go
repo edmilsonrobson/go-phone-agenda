@@ -27,6 +27,11 @@ func validateContact(contact *models.Contact) bool {
 	return true
 }
 
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"message": "up and running, bro" }`))
+}
+
 func ListContacts(repo ContactRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
