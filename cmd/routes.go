@@ -14,7 +14,7 @@ func Routes(r handlers.ContactRepository) http.Handler {
 	mux.Use(LogRequest)
 	r.List()
 
-	mux.Route("/healthcheck", handlers.HealthCheck)
+	mux.Get("/healthcheck", handlers.HealthCheck)
 
 	mux.Route("/contacts", func(router chi.Router) {
 		router.Get("/", handlers.ListContacts(r))
