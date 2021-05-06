@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"fmt"
-
 	"github.com/edmilsonrobson/go-phone-agenda/internal/models"
 )
 
@@ -12,7 +10,6 @@ type InMemoryContactRepository struct {
 
 func (r *InMemoryContactRepository) List() []models.Contact {
 	list := make([]models.Contact, 0, len(r.contacts))
-	fmt.Println(list)
 	for _, v := range r.contacts {
 		list = append(list, v)
 	}
@@ -33,7 +30,6 @@ func (r *InMemoryContactRepository) Add(c *models.Contact) bool {
 	if _, ok := r.contacts[c.Name]; ok {
 		return false
 	}
-	fmt.Println("Adding ", c.Name)
 	r.contacts[c.Name] = *c
 	return true
 }

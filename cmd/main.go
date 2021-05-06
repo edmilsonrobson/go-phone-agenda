@@ -5,20 +5,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/edmilsonrobson/go-phone-agenda/internal/logs"
 	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
+	"github.com/edmilsonrobson/go-phone-agenda/internal/utils"
 	"github.com/gomodule/redigo/redis"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	godotenv.Load()
+	config, err := utils.LoadConfig()
+	if err != nil {
+		log.Fatal("Failed to load config file:", err)
+	}
 
-	defaultServerPort := os.Getenv("SERVER_PORT")
+	defaultServerPort := config.ServerPort
 	if defaultServerPort == "" {
 		log.Fatal("No server port in .env file. Missing .env?")
 	}
@@ -34,14 +36,14 @@ func main() {
 	flag.Parse()
 
 	// Pass it down to repository -> handlers
-	redisConn, err := redis.Dial("tcp", os.Getenv("REDIS_ADDRESS"))
+	redisConn, err := redis.Dial("tcp", config.RedisAddress)
 	if err != nil {
 		logs.ErrorLogger.Printf("Failed to connect with Redis: %v", err)
 	}
 	defer redisConn.Close()
 
-	//repository := repositories.NewInMemoryContactRepository()
-	repository := repositories.NewRedisContactRepository(&redisConn)
+	repository := repositories.NewInMemoryContactRepository()
+	//repository := repositories.NewRedisContactRepository(&redisConn)
 
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(*readTimeout) * time.Second,
@@ -52,8 +54,8 @@ func main() {
 
 	fmt.Printf("Running on 127.0.0.1:%v\n", *portNumber)
 	fmt.Printf("Read timeout: %v seconds | Write timeout: %v seconds\n", *readTimeout, *writeTimeout)
-	fmt.Printf("Redis hostname: %v\n", os.Getenv("REDIS_ADDRESS"))
-	fmt.Printf("Environment: %v\n", os.Getenv("ENV"))
+	fmt.Printf("Redis hostname: %v\n", config.RedisAddress)
+	fmt.Printf("Environment: %v\n", config.Env)
 
 	err = srv.ListenAndServe()
 	if err != nil {

@@ -3,14 +3,11 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/edmilsonrobson/go-phone-agenda/internal/repositories"
 	"github.com/go-chi/chi/v5"
 )
 
-func getTestRoutes() http.Handler {
+func getTestRoutes(r ContactRepository) http.Handler {
 	mux := chi.NewRouter()
-
-	r := repositories.NewInMemoryContactRepository()
 
 	mux.Route("/contacts", func(router chi.Router) {
 		router.Get("/", ListContacts(r))
